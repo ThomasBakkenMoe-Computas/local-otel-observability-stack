@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## Auto-instrumentation on Kubernetes
 
 To enable auto-instrumentation for deployments running Kuernetes: use the [OpenTelemetry Operator](https://opentelemetry.io/docs/kubernetes/operator/automatic/)
@@ -14,3 +15,6 @@ https://opentelemetry.io/docs/languages/net/instrumentation/
 
 Hvordan rigge instrumentert applikasjon til å snakke med OTEL Collector:
 https://opentelemetry.io/docs/languages/net/exporters/
+=======
+# local-otel-observability-stack
+>>>>>>> 68f78263718297e14d73201038284bab424758db
