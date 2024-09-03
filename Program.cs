@@ -1,12 +1,24 @@
+using Grpc.Net.Client;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using System.Net.Http;
 
 var serviceName = "dice-server";
 var serviceVersion = "1.0.0";
 
 var builder = WebApplication.CreateBuilder(args);
+
+var handler = new HttpClientHandler();
+handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator; // TODO: Remove this line in production, replace with safe certificate handling and validation
+
+var grpcChannelOptions = new GrpcChannelOptions
+{
+    HttpClient = new HttpClient(handler)
+};
+
+var grpcChannel = GrpcChannel.ForAddress("https://localhost:4317", grpcChannelOptions);
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(Resource => Resource.AddService(
@@ -16,11 +28,17 @@ builder.Services.AddOpenTelemetry()
         .AddSource(serviceName)
         .AddAspNetCoreInstrumentation()
         .AddConsoleExporter()
-        .AddOtlpExporter())
+        .AddOtlpExporter(options => {
+            options.Endpoint = new Uri("https://localhost:4317");
+            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+        }))
     .WithMetrics(metrics => metrics
         .AddMeter(serviceName)
         .AddConsoleExporter()
-        .AddOtlpExporter());
+        .AddOtlpExporter(options => {
+            options.Endpoint = new Uri("https://localhost:4317");
+            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+        }));
 
 builder.Logging.AddOpenTelemetry(options => {
     options
@@ -28,7 +46,10 @@ builder.Logging.AddOpenTelemetry(options => {
             serviceName: serviceName,
             serviceVersion: serviceVersion))
         .AddConsoleExporter()
-        .AddOtlpExporter();
+        .AddOtlpExporter(options => {
+            options.Endpoint = new Uri("https://localhost:4317");
+            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+        });
 });
 
 builder.Services.AddControllers();
