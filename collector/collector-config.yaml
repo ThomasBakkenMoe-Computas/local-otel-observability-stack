@@ -6,8 +6,15 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
 exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8888"
+  loki:
+    endpoint: "http://loki:3100/loki/api/v1/push"
+  tempo:
+    endpoint: "http://tempo:3200/"
   debug:
     verbosity: detailed
+
 service:
   pipelines:
     traces:
