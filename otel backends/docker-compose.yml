@@ -1,6 +1,19 @@
-version: '3.8'
-
 services:
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    volumes:
+      - grafana_data:/var/lib/grafana
+      
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -27,20 +40,6 @@ services:
       - ./tempo-config.yml:/etc/tempo/tempo-config.yml
     command: -config.file=/etc/tempo/tempo-config.yml
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - 3000:3000
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    depends_on:
-      - prometheus
-      - loki
-      - tempo
-    volumes:
-      - grafana_data:/var/lib/grafana
-
   otel-collector:
     image: otel/opentelemetry-collector:latest
     container_name: otel-collector
@@ -54,6 +53,8 @@ services:
     ports:
       - 4317:4317 # OTEL Collector gRPC port
       - 4318:4318 # OTEL Collector HTTP port
+      - 8888:8888 # Prometheus exporter port
+      # TODO: Missing prot for importing telemetry
 
 volumes:
   grafana_data:
